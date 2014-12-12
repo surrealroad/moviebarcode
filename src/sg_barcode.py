@@ -8,24 +8,28 @@ Generate a movie barcode style image from versions in a shotgun project
 Created by Jack James on 2014-12-09.
 
 """
-import os, sys, urllib, cStringIO
+import os, sys, urllib, cStringIO, argparse
 import numpy
 from PIL import Image
 from shotgun_api3.shotgun import Shotgun
-import _sg_apikeys as apikeys
+
+parser = argparse.ArgumentParser(description='Generate Shotgun project barcode')
+parser.add_argument('-o', '--output', help='Output file', required=True)
+parser.add_argument('-p', '--projectid', help='Project ID', required=True)
+parser.add_argument('-s', '--server', help='Server URL', required=True)
+parser.add_argument('--scriptname', help='Script name', required=True)
+parser.add_argument('--scriptkey', help='Script key', required=True)
+
+args = vars(parser.parse_args())
 
 BARCODE_SIZE = (2000, 400) # width, height
 
 print("Connecting to Shotgun")
-# Fill this in with your server and script/key info
-SERVER= "https://javfx.shotgunstudio.com"
-LOGIN = "sg_barcode"
-KEY = apikeys.getkey(LOGIN)
-sg = Shotgun(SERVER, LOGIN, KEY)
+sg = Shotgun(args['server'], args['scriptname'], args['scriptkey'])
 
 versionEntity = 'Version'
-project_id = 64
-barcode_path = "/Users/jack/Desktop/barcode.png"
+project_id = int(args['projectid'])
+barcode_path = args['output']
 
 def get_barcode_image(versions, barcode_path):
     if os.path.exists(barcode_path):
